@@ -4,6 +4,8 @@
 #include <random>
 #include <vector>
 
+using namespace sf;
+
 constexpr int BALL_FRAME_SIZE = 32;
 constexpr int BALL_COLOR_COUNT = 6;
 constexpr int BALL_FRAME_COUNT = 51;
@@ -12,22 +14,22 @@ constexpr float BALL_RADIUS = (BALL_FRAME_SIZE * BALL_SCALE) / 2.f;
 constexpr float PIXELS_PER_ROLL_FRAME = 6.f; 
 
 struct Ball {
-    sf::Sprite sprite;
-    sf::Vector2f velocity;
+    Sprite sprite;
+    Vector2f velocity;
     float distanceAccum = 0.f;
 
-    Ball(const sf::Texture& texture, int colorIndex)
+    Ball(const Texture& texture, int colorIndex)
         : sprite(texture) {
-        sprite.setTextureRect(sf::IntRect({colorIndex * BALL_FRAME_SIZE, 0},
+        sprite.setTextureRect(IntRect({colorIndex * BALL_FRAME_SIZE, 0},
                                            {BALL_FRAME_SIZE, BALL_FRAME_SIZE}));
         sprite.setOrigin({BALL_FRAME_SIZE / 2.f, BALL_FRAME_SIZE / 2.f});
         sprite.setScale({BALL_SCALE, BALL_SCALE});
     }
 
-    void update(float deltaTime, sf::Vector2u windowSize) {
+    void update(float deltaTime, Vector2u windowSize) {
         sprite.move(velocity * deltaTime);
 
-        sf::Vector2f pos = sprite.getPosition();
+        Vector2f pos = sprite.getPosition();
 
         if (pos.x - BALL_RADIUS < 0.f) {
             pos.x = BALL_RADIUS;
@@ -53,16 +55,16 @@ struct Ball {
         distanceAccum += distanceThisFrame;
 
         int frame = static_cast<int>(distanceAccum / PIXELS_PER_ROLL_FRAME) % BALL_FRAME_COUNT;
-        sf::IntRect rect = sprite.getTextureRect();
+        IntRect rect = sprite.getTextureRect();
         rect.position.y = frame * BALL_FRAME_SIZE;
         sprite.setTextureRect(rect);
     }
 };
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode({1280, 720}), "Teste SFML");
+    RenderWindow window(VideoMode({1280, 720}), "Teste SFML");
 
-    sf::Texture ballsTexture;
+    Texture ballsTexture;
     ballsTexture.loadFromFile("./sprites/balls.png");
 
     std::random_device rd;
@@ -84,42 +86,42 @@ int main() {
         balls.push_back(ball);
     }
 
-    sf::ConvexShape shape;
+    ConvexShape shape;
     shape.setPointCount(3);
     shape.setPoint(0, {0.f, -50.f});
     shape.setPoint(1, {-35.f, 40.f});
     shape.setPoint(2, {35.f, 40.f});
     shape.setOrigin({0.f, 10.f}); // centroide do triângulo
     shape.setPosition({640.f, 360.f});
-    shape.setFillColor(sf::Color::Cyan);
+    shape.setFillColor(Color::Cyan);
 
-    sf::CircleShape shape2(50.f);
-    shape2.setFillColor(sf::Color::Green);
+    CircleShape shape2(50.f);
+    shape2.setFillColor(Color::Green);
     shape2.setPosition({375.f, 275.f});
 
     const float rotationSpeed = 180.f; // graus por segundo
     float speed = 200.f;
-    sf::Clock clock;
+    Clock clock;
 
     while (window.isOpen()) {
         while (const std::optional event = window.pollEvent()) {
-            if (event->is<sf::Event::Closed>())
+            if (event->is<Event::Closed>())
                 window.close();
         }
 
         float deltaTime = clock.restart().asSeconds();
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-            shape.rotate(sf::degrees(-rotationSpeed * deltaTime));
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-            shape.rotate(sf::degrees(rotationSpeed * deltaTime));
+        if (Keyboard::isKeyPressed(Keyboard::Key::Left))
+            shape.rotate(degrees(-rotationSpeed * deltaTime));
+        if (Keyboard::isKeyPressed(Keyboard::Key::Right))
+            shape.rotate(degrees(rotationSpeed * deltaTime));
 
         float angle = shape.getRotation().asRadians();
-        sf::Vector2f direction(std::sin(angle), -std::cos(angle));
+        Vector2f direction(std::sin(angle), -std::cos(angle));
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
+        if (Keyboard::isKeyPressed(Keyboard::Key::Up))
             shape.move(direction * speed * deltaTime);
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
+        if (Keyboard::isKeyPressed(Keyboard::Key::Down))
             shape.move(-direction * speed * deltaTime);
 
         for (Ball& ball : balls)
