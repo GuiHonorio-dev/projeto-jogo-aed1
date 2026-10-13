@@ -25,6 +25,8 @@
 
 #include "estruturas.hpp"
 
+using namespace sf;
+
 namespace {
 
 // ----------------------------------------------------------------------------
